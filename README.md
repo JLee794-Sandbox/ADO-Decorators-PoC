@@ -1,15 +1,35 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Steps to Publish your own VS Extension
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
-
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+1. Create publisher on the [Marketplace management portal](https://aka.ms/vsmarketplace-manage)
+1. Install `tfx` command line tool
+    
+    ```bash
+    npm install -g tfx-cli
+    ```
+    
+1. Navigate to the directory containing the `vss-extension.json`
+1. Generate the `.vsix` file through `tfx extension create`
+    
+    ```bash
+    > tfx extension create --rev-version
+    
+    TFS Cross Platform Command Line Interface v0.11.0
+    Copyright Microsoft Corporation
+    
+    === Completed operation: create extension ===
+     - VSIX: /mnt/c/Users/jinle/Documents/Tools/ADO-Decorator-Demo/Build/Pre/Jinle-SandboxExtensions.jinlesampledecoratorspre-1.0.0.vsix
+     - Extension ID: jinlesampledecoratorspre
+     - Extension Version: 1.0.0
+     - Publisher: Jinle-SandboxExtensions
+    ```
+    
+1. Upload the extension via the [Marketplace management portal](https://aka.ms/vsmarketplace-manage) or through `tfx extension publish`
+1. Share your extension with your ADO Organization
+1. Install the extension on your ADO Organization
+    1. Organization Settings
+        1. Manage Extensions
+            1. Shared
+                1. Install Extension
 
 # Contribute
 TODO: Explain how other users and developers can contribute to make your code better. 
