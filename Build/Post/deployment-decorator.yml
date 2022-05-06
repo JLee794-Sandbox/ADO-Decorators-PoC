@@ -1,0 +1,38 @@
+# inputs:
+#   testDecorator: true # if any other value, will not run this decorator
+#   Build.SourceBranch
+steps:
+- task: PowerShell@2
+  name: DeployToIIS
+  displayName: Deploy to IIS (Injected via Decorator)
+  condition: |
+    and
+    (
+      eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+      eq(variables.testDecorator, 'true')
+    )
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Validation steps to check if IIS
+
+      # Validation steps to check if iOS or Android
+      # > execute deployment accordingly
+      
+      Write-Host @"
+        Your IIS Web Deploy Task can look like this:
+
+        - task: IISWebAppDeploymentOnMachineGroup@
+          inputs:
+            webSiteName: $(webSiteName)
+            virtualApplication: $(virtualAppName)
+            package: '$(System.DefaultWorkingDirectory)\**\*.zip' # Optionally, you can parameterize this as well.
+            setParametersFile: # Optional
+            removeAdditionalFilesFlag: false # Optional
+            excludeFilesFromAppDataFlag: false # Optional
+            takeAppOfflineFlag: false # Optional
+            additionalArguments: # Optional
+            xmlTransformation: # Optional
+            xmlVariableSubstitution: # Optional
+            jSONFiles: # Optional
+      "@

@@ -1,0 +1,55 @@
+# inputs:
+#   testDecorator: true # if any other value, will not run this decorator
+#   Build.SourceBranch
+steps:
+
+- task: PowerShell@2
+  name: ValidateDeploymentVariables
+  displayName: Validate Deployment Variables (Injected via Decorator)
+  condition: |
+    and
+    (
+      eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+      eq(variables.testDecorator, 'true')
+    )
+  inputs:
+    targetType: 'inline'
+    script: |
+      $errorArr = @()
+
+      try {
+        Write-Host "VirtualAppName: $(virtualAppName)"
+        # your input test cases go here
+        # e.g querying the remote-machine to match the virtualAppName
+      }
+      catch {
+        errorArr += 'virtualAppName'
+        Write-Host "##vso[task.logissue type=error]Input parameter 'virtualAppName' failed validation tests."
+      }
+
+      try {
+        Write-Host "GroupID: $(groupId)"
+        # your input test cases go here
+        # e.g querying the remote-machine to match the groupId against the local file permissions
+      }
+      catch {
+        Write-Host "##vso[task.logissue type=error]Input parameter 'groupId' failed validation tests."
+        errorArr += 'GroupID'
+      }
+
+      try {
+        Write-Host "WebSiteName: $(webSiteName)"
+        # your input test cases go here
+        # e.g querying the web-site URL to see if site already exists, etc.
+      }
+      catch {
+        Write-Host "##vso[task.logissue type=error]Input parameter 'webSiteName' failed validation tests."
+        errorArr += 'GroupID'
+      }
+
+      if ($errorArr.count -gt 0) {
+        # Link to your teams documentation for further explanation
+        Write-Warning -Message "Please provide valid parameters for the following variables: $($errorArr.join(', '))"
+        Write-Warning -Message "See https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch for additional details"
+        throw "Please provide valid values for $($errorArr.join(', '))."
+      }
