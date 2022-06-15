@@ -1,0 +1,34 @@
+{
+  "manifestVersion": 1,
+  "version": "1.1.8",
+  "id": "jinlesampledecoratorspre",
+  "publisher": "Jinle-SandboxExtensions",
+  "name": "Demo Pipeline Decorators PRE",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "contributions": [
+      {
+          "id": "input-parameter-validation-task",
+          "type": "ms.azure-pipelines.pipeline-decorator",
+          "targets": [
+            "ms.azure-pipelines-agent-job.pre-job-tasks"
+          ],
+          "properties": {
+            "template": "input-parameter-decorator.yml"
+          }
+      }
+  ],
+  "files": [
+    {
+        "path": "input-parameter-decorator.yml",
+        "addressable": true,
+        "contentType": "text/plain"
+    }
+  ]
+}

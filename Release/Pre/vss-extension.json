@@ -1,0 +1,35 @@
+{
+  "manifestVersion": 1,
+  "id": "jinlesamplereleasedecoratorspre",
+  "version": "0.1.6",
+  "name": "Demo Release Decoartors PRE",
+  "publisher": "Jinle-SandboxExtensions",
+  "targets": [
+      {
+          "id": "Microsoft.VisualStudio.Services"
+      }
+  ],
+  "description": "This is the example of a Decorator which works with Classic Release pipelines, and execute BEFORE any other task",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "contributions": [
+        {
+            "id": "my-required-task",
+            "type": "ms.azure-pipelines.pipeline-decorator",
+            "targets": [
+                "ms.azure-release-pipelines-agent-job.pre-job-tasks"
+            ],
+            "properties": {
+                "template": "release-decorator.yml"
+            }
+        }
+    ],
+    "files": [
+        {
+            "path": "release-decorator.yml",
+            "addressable": true,
+            "contentType": "text/plain"
+        }
+    ]
+}
