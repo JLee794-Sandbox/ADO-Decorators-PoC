@@ -10,6 +10,7 @@
     - [Process - New Application](#process---new-application)
     - [Process - Existing Application Update](#process---existing-application-update)
 - [Contribute](#contribute)
+
 ## Steps to Publish your own VS Extension
 
 1. Create publisher on the [Marketplace management portal](https://aka.ms/vsmarketplace-manage)
