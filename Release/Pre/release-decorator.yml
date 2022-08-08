@@ -1,10 +1,18 @@
+
 steps:
 - task: PowerShell@2
   displayName: Check for testDecorator variable
   inputs:
     targetType: 'inline'
     script: |
-      Write-Host "testDecorator: $(testDecorator)"
+      Write-Host "This will run every time before the Release pipeline is executed."
+      try {
+        Write-Host "testDecorator: $(testDecorator)"
+      }
+      catch {
+        Write-Host "testDecorator is not set for this pipeline."
+      }
+      
 
 - task: PowerShell@2
   displayName: Validate Deployment Variables for RELEASE (Injected via Decorator)
@@ -13,7 +21,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $errorArr = @()
+      $errorArr = New-Object System.Collections.ArrayList
 
       try {
         Write-Host "VirtualAppName: $(virtualAppName)"
@@ -21,7 +29,7 @@ steps:
         # e.g querying the remote-machine to match the virtualAppName
       }
       catch {
-        errorArr += 'virtualAppName'
+        $errorArr.Add("virtualAppName")
         Write-Host "##vso[task.logissue type=error]Input parameter 'virtualAppName' failed validation tests."
       }
 
@@ -32,7 +40,7 @@ steps:
       }
       catch {
         Write-Host "##vso[task.logissue type=error]Input parameter 'groupId' failed validation tests."
-        errorArr += 'GroupID'
+        $errorArr.Add("GroupID")
       }
 
       try {
@@ -42,12 +50,12 @@ steps:
       }
       catch {
         Write-Host "##vso[task.logissue type=error]Input parameter 'webSiteName' failed validation tests."
-        errorArr += 'GroupID'
+        $errorArr.Add("webSiteName")
       }
 
       if ($errorArr.count -gt 0) {
         # Link to your teams documentation for further explanation
-        Write-Warning -Message "Please provide valid parameters for the following variables: $($errorArr.join(', '))"
+        Write-Warning -Message "Please provide valid parameters for the following variables: $errorArr"
         Write-Warning -Message "See https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch for additional details"
-        throw "Please provide valid values for $($errorArr.join(', '))."
+        throw "Please provide valid values for $errorArr"
       }
