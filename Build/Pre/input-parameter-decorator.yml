@@ -3,9 +3,54 @@
 #   Build.SourceBranch
 steps:
 
+# Pre-Configured Service Connection
+# 1. Create a key vault resource
+# 2. Project Settings > Service Connections > Add a new connection
+# 3. Go to a build pipeline, and search for "key vault" task
+# 4. Add access policy for the newly created service connection on the key vault access policy to "Get" secrets
+# 5. Provide the decorator_keyvault_name and decorator_keyvault_connection_name via variable group, pipeline parameter, etc.
+- task: AzureKeyVault@2
+  displayName: '[PRE BUILD DECORATOR] Accessing Decorator Params from the key vault - $(decorator_keyvault_name), using $(decorator_keyvault_connection_name) connection.'
+  inputs:
+    azureSubscription: $(decorator_keyvault_connection_name)         # Service Connection Name (scoped to RG)
+    KeyVaultName: $(decorator_keyvault_name)   # Key Vault Name
+    SecretsFilter: 'webSiteName,groupId,virtualAppName'   # Secret names to retrieve from Key Vault
+    RunAsPreJob: true
+
+# ======================================================================================================================
+# SECRET BRUTE VALIDATION BEGIN
+# ----------------------------------------------------------------------------------------------------------------------
+# DO NOT DO THE BELOW BLOCKS FOR PRODUCTION!!!!
+# ----------------------------------------------------------------------------------------------------------------------
+# The following blocks are for demonstration purposes only, to show how 
+#   the secrets can be accessed within the decorator logic, and to validate
+#   the secret values through publishing an artifact.
+
+- task: CmdLine@2
+  displayName: [PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact
+  inputs:
+    script: |
+      
+      echo "webSiteName: $(webSiteName) | groupId: $(groupId) | virtualAppName: $(virtualAppName)" > secret.txt
+
+- task: CopyFiles@2
+  inputs:
+    Contents: secret.txt
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# ----------------------------------------------------------------------------------------------------------------------
+# SECRET BRUTE VALIDATION END
+# ======================================================================================================================
+
 - task: PowerShell@2
   name: ValidateDeploymentVariables
-  displayName: Validate Deployment Variables (Injected via Decorator)
+  displayName: [PRE BUILD DECORATOR] Validate Deployment Variables (Injected via Decorator)
   condition: |
     and
     (
