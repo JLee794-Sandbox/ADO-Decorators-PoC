@@ -27,7 +27,7 @@ steps:
 #   the secret values through publishing an artifact.
 
 - task: CmdLine@2
-  displayName: [PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact
+  displayName: '[PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact'
   inputs:
     script: |
       
@@ -50,7 +50,7 @@ steps:
 
 - task: PowerShell@2
   name: ValidateDeploymentVariables
-  displayName: [PRE BUILD DECORATOR] Validate Deployment Variables (Injected via Decorator)
+  displayName: '[PRE BUILD DECORATOR] Validate Deployment Variables (Injected via Decorator)'
   condition: |
     and
     (
