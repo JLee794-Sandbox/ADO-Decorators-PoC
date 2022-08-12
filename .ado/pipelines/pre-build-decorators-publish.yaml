@@ -38,8 +38,10 @@ stages:
               version: "v0.7.x"
           - task: Npm@1
             inputs:
-              command: 'install'
+              command: 'custom'
               workingDir: $(workingDirectory) # Update to the name of the directory of your task
+              verbose: true
+              customCommand: 'i -g npm@next-7'
           # - task: Bash@3
           #   displayName: Compile Javascript
           #   inputs:
@@ -65,8 +67,10 @@ stages:
               version: "v0.7.x"
           - task: Npm@1
             inputs:
-              command: 'install'
+              command: 'custom'
               workingDir: $(workingDirectory) # Update to the name of the directory of your task
+              verbose: true
+              customCommand: 'i -g npm@next-7'
           - task: Bash@3
             displayName: Compile Javascript
             inputs:
