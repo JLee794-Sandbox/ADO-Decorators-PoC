@@ -29,33 +29,33 @@ variables:
 
 
 stages:
-  # - stage: Run_and_publish_unit_tests
-  #   jobs:
-  #     - job:
-  #       steps:
-  #         - task: TfxInstaller@3
-  #           inputs:
-  #             version: "v0.7.x"
-  #         - task: Npm@1
-  #           inputs:
-  #             command: 'install'
-  #             workingDir: $(workingDirectory) # Update to the name of the directory of your task
-  #         - task: Bash@3
-  #           displayName: Compile Javascript
-  #           inputs:
-  #             targetType: "inline"
-  #             script: |
-  #               cd TaskDirectory # Update to the name of the directory of your task
-  #               tsc
-  #         - task: Npm@1
-  #           inputs:
-  #             command: 'custom'
-  #             workingDir: '/TestsDirectory' # Update to the name of the directory of your task's tests
-  #             customCommand: 'testScript' # See the definition in the explanation section below - it may be called test
-  #         - task: PublishTestResults@2
-  #           inputs:
-  #             testResultsFormat: 'JUnit'
-  #             testResultsFiles: '**/ResultsFile.xml'
+  - stage: Run_and_publish_unit_tests
+    jobs:
+      - job:
+        steps:
+          - task: TfxInstaller@3
+            inputs:
+              version: "v0.7.x"
+          - task: Npm@1
+            inputs:
+              command: 'install'
+              workingDir: $(workingDirectory) # Update to the name of the directory of your task
+          # - task: Bash@3
+          #   displayName: Compile Javascript
+          #   inputs:
+          #     targetType: "inline"
+          #     script: |
+          #       cd TaskDirectory # Update to the name of the directory of your task
+          #       tsc
+          # - task: Npm@1
+          #   inputs:
+          #     command: 'custom'
+          #     workingDir: '/TestsDirectory' # Update to the name of the directory of your task's tests
+          #     customCommand: 'testScript' # See the definition in the explanation section below - it may be called test
+          # - task: PublishTestResults@2
+          #   inputs:
+          #     testResultsFormat: 'JUnit'
+          #     testResultsFiles: '**/ResultsFile.xml'
   - stage: Package_extension_and_publish_build_artifacts
     jobs:
       - job:
