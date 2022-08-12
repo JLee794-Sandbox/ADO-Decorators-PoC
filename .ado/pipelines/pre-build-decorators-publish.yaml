@@ -17,7 +17,7 @@ trigger:
 variables:
   - group: decorator-publish-vars # Rename to whatever you named your variable group in the prerequisite stage of step 6
   - name: workingDirectory
-    value: 'Build/Pre'
+    value: '$(Build.SourcesDirectory)/Build/Pre'
   - name: ServiceConnection
     value: VSMarketplaceConn
   - name: ExtensionName
