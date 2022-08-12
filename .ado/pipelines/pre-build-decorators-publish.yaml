@@ -71,13 +71,13 @@ stages:
               workingDir: $(workingDirectory) # Update to the name of the directory of your task
               verbose: true
               customCommand: 'i -g npm@next-7'
-          - task: Bash@3
-            displayName: Compile Javascript
-            inputs:
-              targetType: "inline"
-              script: |
-                cd $(workingDirectory)  # Update to the name of the directory of your task
-                tsc
+          # - task: Bash@3
+          #   displayName: Compile Javascript
+          #   inputs:
+          #     targetType: "inline"
+          #     script: |
+          #       cd $(workingDirectory)  # Update to the name of the directory of your task
+          #       tsc
           - task: QueryAzureDevOpsExtensionVersion@3
             inputs:
               connectTo: 'VsTeam'
