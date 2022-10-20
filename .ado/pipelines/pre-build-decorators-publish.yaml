@@ -57,7 +57,7 @@ stages:
                 # sudo npm install tfx-cli -g
                 # cd .$(targetDirectory)
                 ls -al
-                tfx extension create --manifest-globs vss-extension.json --rev-version
+                tfx extension create --manifest-globs vss-extension.json
               workingDirectory: $(Build.Repository.LocalPath)/$(targetDirectory)
 
           - task: CopyFiles@2
