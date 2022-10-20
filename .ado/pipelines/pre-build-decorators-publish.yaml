@@ -57,16 +57,13 @@ stages:
                 # sudo npm install tfx-cli -g
                 # cd .$(targetDirectory)
                 ls -al
-                tfx extension create \
-                  --manifest-globs vss-extension.json \
-                  --rev-version \
-                  --output-path $(Agent.TempDirectory)
+                tfx extension create --manifest-globs vss-extension.json --rev-version
               workingDirectory: $(Build.Repository.LocalPath)/$(targetDirectory)
 
           - task: CopyFiles@2
             displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
             inputs:
-              Contents: "$(Agent.TempDirectory)/*.vsix"
+              Contents: "$(Build.Repository.LocalPath)/$(targetDirectory)/*.vsix"
               TargetFolder: "$(Build.ArtifactStagingDirectory)"
 
           - task: PublishBuildArtifacts@1
