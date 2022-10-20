@@ -46,7 +46,6 @@ stages:
           - task: Npm@1
             inputs:
               command: 'custom'
-              workingDir: $(System.DefaultWorkingDirectory)/$(workingDirectory) # Update to the name of the directory of your task
               verbose: true
               customCommand: 'i -g npm@next-7'
           
@@ -56,11 +55,12 @@ stages:
               targetType: 'inline'
               script: |
                 # sudo npm install tfx-cli -g
+                cd $(workingDirectory)
                 tfx extension create \
                   --manifest-globs vss-extension.json \
                   --rev-version \
                   --output-path $(Agent.TempDirectory)
-              workingDirectory: '$(Agent.BuildDirectory)/$(workingDirectory)'
+              # workingDirectory: '$(Agent.BuildDirectory)/$(workingDirectory)'
 
           - task: CopyFiles@2
             displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
