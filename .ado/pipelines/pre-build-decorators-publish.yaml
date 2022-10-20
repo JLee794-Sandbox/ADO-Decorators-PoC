@@ -17,96 +17,58 @@ trigger:
 variables:
   - group: decorator-publish-vars # Rename to whatever you named your variable group in the prerequisite stage of step 6
   - name: workingDirectory
-    value: '$(Build.SourcesDirectory)/Build/Pre'
-  - name: ServiceConnection
-    value: VSMarketplaceConn
-  - name: ExtensionName
-    value: 'Demo Pipeline Decorators PRE'
-  - name: ExtensionID
-    value: 'jinlesampledecoratorspre'
+    value: '/Build/Pre'
+  # - name: ServiceConnection
+  #   value: vsts-marketplace
+  # - name: ExtensionName
+  #   value: 'Demo Pipeline Decorators PRE'
+  # - name: ExtensionID
+  #   value: 'jinlesampledecoratorspre'
   - name: ArtifactName
-    value: 'build.pre'
+    value: 'build.pre.vsix'
 
 
 stages:
-  - stage: Run_and_publish_unit_tests
-    jobs:
-      - job:
-        steps:
-          - task: TfxInstaller@3
-            inputs:
-              version: "v0.7.x"
-          - task: Npm@1
-            inputs:
-              command: 'custom'
-              workingDir: $(workingDirectory) # Update to the name of the directory of your task
-              verbose: true
-              customCommand: 'i -g npm@next-7'
-          # - task: Bash@3
-          #   displayName: Compile Javascript
-          #   inputs:
-          #     targetType: "inline"
-          #     script: |
-          #       cd TaskDirectory # Update to the name of the directory of your task
-          #       tsc
-          # - task: Npm@1
-          #   inputs:
-          #     command: 'custom'
-          #     workingDir: '/TestsDirectory' # Update to the name of the directory of your task's tests
-          #     customCommand: 'testScript' # See the definition in the explanation section below - it may be called test
-          # - task: PublishTestResults@2
-          #   inputs:
-          #     testResultsFormat: 'JUnit'
-          #     testResultsFiles: '**/ResultsFile.xml'
   - stage: Package_extension_and_publish_build_artifacts
     jobs:
       - job:
         steps:
+      
+          - checkout: self
           - task: TfxInstaller@3
             inputs:
               version: "v0.7.x"
+
           - task: Npm@1
             inputs:
               command: 'custom'
-              workingDir: $(workingDirectory) # Update to the name of the directory of your task
+              workingDir: $(Agent.BuildDirectory)/$(workingDirectory) # Update to the name of the directory of your task
               verbose: true
               customCommand: 'i -g npm@next-7'
-          # - task: Bash@3
-          #   displayName: Compile Javascript
-          #   inputs:
-          #     targetType: "inline"
-          #     script: |
-          #       cd $(workingDirectory)  # Update to the name of the directory of your task
-          #       tsc
-          - task: QueryAzureDevOpsExtensionVersion@3
+          
+
+          - task: Bash@3
             inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: '$(ServiceConnection)' # Change to whatever you named the service connection
-              publisherId: '$(PublisherID)'
-              extensionId: '$(ExtensionID)'
-              versionAction: 'Patch'
-              outputVariable: 'Task.Extension.Version'
-          - task: PackageAzureDevOpsExtension@3
-            inputs:
-              rootFolder: '$(System.DefaultWorkingDirectory)'
-              publisherId: '$(PublisherID)'
-              extensionId: '$(ExtensionID)'
-              extensionName: '$(ExtensionName)'
-              extensionVersion: '$(Task.Extension.Version)'
-              updateTasksVersion: true
-              updateTasksVersionType: 'patch'
-              extensionVisibility: 'private' # Change to public if you're publishing to the marketplace
-              extensionPricing: 'free'
+              workingDirectory: $(Agent.BuildDirectory)/$(workingDirectory)
+              script: |
+                # sudo npm install tfx-cli -g
+                tfx extension create \
+                  --manifest-globs vss-extension.json \
+                  --rev-version \
+                  --output-path $(Agent.TempDirectory)
+
           - task: CopyFiles@2
             displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
             inputs:
-              Contents: "**/*.vsix"
+              Contents: "$(Agent.TempDirectory)/*.vsix"
               TargetFolder: "$(Build.ArtifactStagingDirectory)"
+
           - task: PublishBuildArtifacts@1
             inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: '$(ArtifactName)'
+              PathtoPublish: $(Build.ArtifactStagingDirectory)
+              ArtifactName: $(ArtifactName)
               publishLocation: 'Container'
+
   - stage: Download_build_artifacts_and_publish_the_extension
     jobs:
       - job:
@@ -118,17 +80,28 @@ stages:
             inputs:
               buildType: "current"
               downloadType: "single"
-              artifactName: "$(ArtifactName)"
-              downloadPath: "$(System.DefaultWorkingDirectory)"
+              artifactName: $(ArtifactName)
+              downloadPath: $(System.DefaultWorkingDirectory)
+
+          # - task: Bash@3
+          #   inputs:
+          #     workingDirectory: $(System.DefaultWorkingDirectory)
+          #     script: |
+          #       # sudo npm install tfx-cli -g
+          #       tfx extension create \
+          #         --manifest-globs vss-extension.json \
+          #         --rev-version \
+          #         --output-path $(Agent.TempDirectory)
           - task: PublishAzureDevOpsExtension@3
             inputs:
               connectTo: 'VsTeam'
-              connectedServiceName: '$(ServiceConnection)' # Change to whatever you named the service connection
+              connectedServiceName: $(ServiceConnection)
               fileType: 'vsix'
-              vsixFile: '$(PublisherID).$(ExtensionName)/$(PublisherID)..vsix'
-              publisherId: '$(PublisherID)'
-              extensionId: '$(ExtensionID)'
-              extensionName: '$(ExtensionName)'
-              updateTasksVersion: false
-              extensionVisibility: 'private' # Change to public if you're publishing to the marketplace
+              vsixFile: $(System.DefaultWorkingDirectory)/$(ArtifactName)
+              extensionVisibility: 'private'
               extensionPricing: 'free'
+        
+
+              # publisherId: $(PublisherID)
+              # extensionId: $(ExtensionID)
+              # extensionName: $(ExtensionName)
