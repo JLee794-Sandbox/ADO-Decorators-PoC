@@ -16,7 +16,7 @@ trigger:
 
 variables:
   - group: decorator-publish-vars # Rename to whatever you named your variable group in the prerequisite stage of step 6
-  - name: workingDirectory
+  - name: targetDirectory
     value: '/Build/Pre'
   # - name: ServiceConnection
   #   value: vsts-marketplace
@@ -55,12 +55,12 @@ stages:
               targetType: 'inline'
               script: |
                 # sudo npm install tfx-cli -g
-                cd $(workingDirectory)
+                # cd .$(targetDirectory)
                 tfx extension create \
                   --manifest-globs vss-extension.json \
                   --rev-version \
                   --output-path $(Agent.TempDirectory)
-              # workingDirectory: '$(Agent.BuildDirectory)/$(workingDirectory)'
+              workingDirectory: $(Build.Repository.LocalPath)/$(targetDirectory)
 
           - task: CopyFiles@2
             displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
