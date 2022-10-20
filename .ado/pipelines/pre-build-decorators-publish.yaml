@@ -39,8 +39,8 @@ stages:
             inputs:
               version: "v0.7.x"
           - task: Bash@3
-            inputs: |
-              ls -al
+            inputs:
+              script: ls -al 
 
           - task: Npm@1
             inputs:
