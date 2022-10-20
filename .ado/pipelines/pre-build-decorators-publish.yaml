@@ -46,7 +46,7 @@ stages:
           - task: Npm@1
             inputs:
               command: 'custom'
-              workingDir: $(Agent.BuildDirectory)/$(workingDirectory) # Update to the name of the directory of your task
+              workingDir: $(System.DefaultWorkingDirectory)/$(workingDirectory) # Update to the name of the directory of your task
               verbose: true
               customCommand: 'i -g npm@next-7'
           
