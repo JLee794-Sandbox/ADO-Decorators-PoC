@@ -38,6 +38,9 @@ stages:
           - task: TfxInstaller@3
             inputs:
               version: "v0.7.x"
+          - task: Bash@3
+            inputs: |
+              ls -al
 
           - task: Npm@1
             inputs:
