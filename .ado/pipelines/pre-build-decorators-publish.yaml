@@ -86,15 +86,11 @@ stages:
               artifactName: $(ArtifactName)
               downloadPath: $(System.DefaultWorkingDirectory)
 
-          # - task: Bash@3
-          #   inputs:
-          #     workingDirectory: $(System.DefaultWorkingDirectory)
-          #     script: |
-          #       # sudo npm install tfx-cli -g
-          #       tfx extension create \
-          #         --manifest-globs vss-extension.json \
-          #         --rev-version \
-          #         --output-path $(Agent.TempDirectory)
+          - task: Bash@3
+            inputs:
+              workingDirectory: $(System.DefaultWorkingDirectory)
+              script: |
+                ls -al
           - task: PublishAzureDevOpsExtension@3
             inputs:
               connectTo: 'VsTeam'
