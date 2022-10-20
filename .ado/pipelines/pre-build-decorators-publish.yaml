@@ -40,7 +40,8 @@ stages:
               version: "v0.7.x"
           - task: Bash@3
             inputs:
-              script: ls -al 
+              targetType: 'inline'
+              script: 'ls -al'
 
           - task: Npm@1
             inputs:
@@ -52,13 +53,14 @@ stages:
 
           - task: Bash@3
             inputs:
-              workingDirectory: $(Agent.BuildDirectory)/$(workingDirectory)
+              targetType: 'inline'
               script: |
                 # sudo npm install tfx-cli -g
                 tfx extension create \
                   --manifest-globs vss-extension.json \
                   --rev-version \
                   --output-path $(Agent.TempDirectory)
+              workingDirectory: '$(Agent.BuildDirectory)/$(workingDirectory)'
 
           - task: CopyFiles@2
             displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
