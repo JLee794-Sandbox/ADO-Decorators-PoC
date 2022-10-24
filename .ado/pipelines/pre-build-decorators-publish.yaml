@@ -60,46 +60,46 @@ stages:
                 tfx extension create --manifest-globs vss-extension.json
               workingDirectory: $(Build.Repository.LocalPath)/$(targetDirectory)
 
-          - task: CopyFiles@2
-            displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
-            inputs:
-              Contents: "$(Build.Repository.LocalPath)/$(targetDirectory)/*.vsix"
-              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+  #         - task: CopyFiles@2
+  #           displayName: "Copy Files to: $(Build.ArtifactStagingDirectory)"
+  #           inputs:
+  #             Contents: "$(Build.Repository.LocalPath)/$(targetDirectory)/*.vsix"
+  #             TargetFolder: "$(Build.ArtifactStagingDirectory)"
 
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: $(Build.ArtifactStagingDirectory)
-              ArtifactName: $(ArtifactName)
-              publishLocation: 'Container'
+  #         - task: PublishBuildArtifacts@1
+  #           inputs:
+  #             PathtoPublish: $(Build.ArtifactStagingDirectory)
+  #             ArtifactName: $(ArtifactName)
+  #             publishLocation: 'Container'
 
-  - stage: Download_build_artifacts_and_publish_the_extension
-    jobs:
-      - job:
-        steps:
-          - task: TfxInstaller@3
-            inputs:
-              version: "v0.7.x"
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: "current"
-              downloadType: "single"
-              artifactName: $(ArtifactName)
-              downloadPath: $(System.DefaultWorkingDirectory)
+  # - stage: Download_build_artifacts_and_publish_the_extension
+  #   jobs:
+  #     - job:
+  #       steps:
+  #         - task: TfxInstaller@3
+  #           inputs:
+  #             version: "v0.7.x"
+  #         - task: DownloadBuildArtifacts@0
+  #           inputs:
+  #             buildType: "current"
+  #             downloadType: "single"
+  #             artifactName: $(ArtifactName)
+  #             downloadPath: $(System.DefaultWorkingDirectory)
 
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              workingDirectory: $(System.DefaultWorkingDirectory)
-              script: |
-                ls -al
-          - task: PublishAzureDevOpsExtension@3
-            inputs:
-              connectTo: 'VsTeam'
-              connectedServiceName: $(ServiceConnection)
-              fileType: 'vsix'
-              vsixFile: $(System.DefaultWorkingDirectory)/$(ArtifactName)
-              extensionVisibility: 'private'
-              extensionPricing: 'free'
+  #         - task: Bash@3
+  #           inputs:
+  #             targetType: 'inline'
+  #             workingDirectory: $(System.DefaultWorkingDirectory)
+  #             script: |
+  #               ls -al
+  #         - task: PublishAzureDevOpsExtension@3
+  #           inputs:
+  #             connectTo: 'VsTeam'
+  #             connectedServiceName: $(ServiceConnection)
+  #             fileType: 'vsix'
+  #             vsixFile: $(System.DefaultWorkingDirectory)/$(ArtifactName)
+  #             extensionVisibility: 'private'
+  #             extensionPricing: 'free'
         
 
               # publisherId: $(PublisherID)
