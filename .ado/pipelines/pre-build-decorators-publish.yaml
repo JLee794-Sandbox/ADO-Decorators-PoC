@@ -58,7 +58,7 @@ stages:
                 # cd .$(targetDirectory)
                 ls -al
                 tfx extension create --manifest-globs vss-extension.json
-                tfx extension publish
+                tfx extension publish --rev-version --token $(PAT)
               workingDirectory: $(Build.Repository.LocalPath)/$(targetDirectory)
 
   #         - task: CopyFiles@2
