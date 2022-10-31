@@ -1,7 +1,3 @@
-# inputs:
-#   testDecorator: true # if any other value, will not run this decorator
-#   Build.SourceBranch
-steps:
 
 # Pre-Configured Service Connection
 # 1. Create a key vault resource
@@ -9,92 +5,91 @@ steps:
 # 3. Go to a build pipeline, and search for "key vault" task
 # 4. Add access policy for the newly created service connection on the key vault access policy to "Get" secrets
 # 5. Provide the decorator_keyvault_name and decorator_keyvault_connection_name via variable group, pipeline parameter, etc.
-- task: AzureKeyVault@2
-  displayName: '[PRE BUILD DECORATOR] Accessing Decorator Params from the key vault - $(decorator_keyvault_name), using $(decorator_keyvault_connection_name) connection.'
-  inputs:
-    azureSubscription: $(decorator_keyvault_connection_name)         # Service Connection Name (scoped to RG)
-    KeyVaultName: $(decorator_keyvault_name)   # Key Vault Name
-    SecretsFilter: 'webSiteName,groupId,virtualAppName'   # Secret names to retrieve from Key Vault
-    RunAsPreJob: true
 
-# ======================================================================================================================
-# SECRET BRUTE VALIDATION BEGIN
-# ----------------------------------------------------------------------------------------------------------------------
-# DO NOT DO THE BELOW BLOCKS FOR PRODUCTION!!!!
-# ----------------------------------------------------------------------------------------------------------------------
-# The following blocks are for demonstration purposes only, to show how 
-#   the secrets can be accessed within the decorator logic, and to validate
-#   the secret values through publishing an artifact.
+steps:
+- ${{ if and(ne(variables['Build.SourceBranchName'], 'main'), or(contains(variables['testDecorator'],'true')) ) }}:
+  - task: AzureKeyVault@2
+    displayName: '[PRE BUILD DECORATOR] Accessing Decorator Params from the key vault - $(decorator_keyvault_name), using $(decorator_keyvault_connection_name) connection.'
+    inputs:
+      azureSubscription: $(decorator_keyvault_connection_name)         # Service Connection Name (scoped to RG)
+      KeyVaultName: $(decorator_keyvault_name)   # Key Vault Name
+      SecretsFilter: 'webSiteName,groupId,virtualAppName'   # Secret names to retrieve from Key Vault
+      RunAsPreJob: true
 
-- task: CmdLine@2
-  displayName: '[PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact'
-  inputs:
-    script: |
-      
-      echo "webSiteName: $(webSiteName) | groupId: $(groupId) | virtualAppName: $(virtualAppName)" > secret.txt
+  # ======================================================================================================================
+  # SECRET BRUTE VALIDATION BEGIN
+  # ----------------------------------------------------------------------------------------------------------------------
+  # DO NOT DO THE BELOW BLOCKS FOR PRODUCTION!!!!
+  # ----------------------------------------------------------------------------------------------------------------------
+  # The following blocks are for demonstration purposes only, to show how 
+  #   the secrets can be accessed within the decorator logic, and to validate
+  #   the secret values through publishing an artifact.
 
-- task: CopyFiles@2
-  inputs:
-    Contents: secret.txt
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
+  - task: CmdLine@2
+    displayName: '[PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact'
+    inputs:
+      script: |
+        # NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic
+        echo "##[warning]NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic"
+        echo "##[debug]Output the values of variables as artifacts for debugging purposes"
+        echo "webSiteName: $(webSiteName) | groupId: $(groupId) | virtualAppName: $(virtualAppName)" > secret.txt
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+  - task: CopyFiles@2
+    inputs:
+      Contents: secret.txt
+      targetFolder: '$(Build.ArtifactStagingDirectory)'
 
-# ----------------------------------------------------------------------------------------------------------------------
-# SECRET BRUTE VALIDATION END
-# ======================================================================================================================
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
 
-- task: PowerShell@2
-  name: ValidateDeploymentVariables
-  displayName: '[PRE BUILD DECORATOR] Validate Deployment Variables (Injected via Decorator)'
-  condition: |
-    and
-    (
-      eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-      eq(variables.testDecorator, 'true')
-    )
-  inputs:
-    targetType: 'inline'
-    script: |
-      $errorArr = @()
+  # ----------------------------------------------------------------------------------------------------------------------
+  # SECRET BRUTE VALIDATION END
+  # ======================================================================================================================
 
-      try {
-        Write-Host "VirtualAppName: $(virtualAppName)"
-        # your input test cases go here
-        # e.g querying the remote-machine to match the virtualAppName
-      }
-      catch {
-        errorArr += 'virtualAppName'
-        Write-Host "##vso[task.logissue type=error]Input parameter 'virtualAppName' failed validation tests."
-      }
+  - task: PowerShell@2
+    name: ValidateDeploymentVariables
+    displayName: '[PRE BUILD DECORATOR] Validate Deployment Variables (Injected via Decorator)'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $errorArr = @()
 
-      try {
-        Write-Host "GroupID: $(groupId)"
-        # your input test cases go here
-        # e.g querying the remote-machine to match the groupId against the local file permissions
-      }
-      catch {
-        Write-Host "##vso[task.logissue type=error]Input parameter 'groupId' failed validation tests."
-        errorArr += 'GroupID'
-      }
+        try {
+          Write-Host "VirtualAppName: $(virtualAppName)"
+          # your input test cases go here
+          # e.g querying the remote-machine to match the virtualAppName
+        }
+        catch {
+          errorArr += 'virtualAppName'
+          Write-Host "##vso[task.logissue type=error]Input parameter 'virtualAppName' failed validation tests."
+        }
 
-      try {
-        Write-Host "WebSiteName: $(webSiteName)"
-        # your input test cases go here
-        # e.g querying the web-site URL to see if site already exists, etc.
-      }
-      catch {
-        Write-Host "##vso[task.logissue type=error]Input parameter 'webSiteName' failed validation tests."
-        errorArr += 'GroupID'
-      }
+        try {
+          Write-Host "GroupID: $(groupId)"
+          # your input test cases go here
+          # e.g querying the remote-machine to match the groupId against the local file permissions
+        }
+        catch {
+          Write-Host "##vso[task.logissue type=error]Input parameter 'groupId' failed validation tests."
+          errorArr += 'GroupID'
+        }
 
-      if ($errorArr.count -gt 0) {
-        # Link to your teams documentation for further explanation
-        Write-Warning -Message "Please provide valid parameters for the following variables: $($errorArr.join(', '))"
-        Write-Warning -Message "See https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch for additional details"
-        throw "Please provide valid values for $($errorArr.join(', '))."
-      }
+        try {
+          Write-Host "WebSiteName: $(webSiteName)"
+          # your input test cases go here
+          # e.g querying the web-site URL to see if site already exists, etc.
+        }
+        catch {
+          Write-Host "##vso[task.logissue type=error]Input parameter 'webSiteName' failed validation tests."
+          errorArr += 'GroupID'
+        }
+
+        if ($errorArr.count -gt 0) {
+          # Link to your teams documentation for further explanation
+          Write-Warning -Message "Please provide valid parameters for the following variables: $($errorArr.join(', '))"
+          Write-Warning -Message "See https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch for additional details"
+          throw "Please provide valid values for $($errorArr.join(', '))."
+        }
