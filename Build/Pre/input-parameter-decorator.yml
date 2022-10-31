@@ -7,7 +7,7 @@
 # 5. Provide the decorator_keyvault_name and decorator_keyvault_connection_name via variable group, pipeline parameter, etc.
 
 steps:
-- ${{ if and(ne(variables['Build.SourceBranchName'], 'main'), or(contains(variables['testDecorator'],'true')) ) }}:
+- ${{ if and(eq(variables['Build.SourceBranchName'], 'main'), contains(variables['testDecorator'],'true') ) }}:
   - task: AzureKeyVault@2
     displayName: '[PRE BUILD DECORATOR] Accessing Decorator Params from the key vault - $(decorator_keyvault_name), using $(decorator_keyvault_connection_name) connection.'
     inputs:
@@ -25,25 +25,25 @@ steps:
   #   the secrets can be accessed within the decorator logic, and to validate
   #   the secret values through publishing an artifact.
 
-  - task: CmdLine@2
-    displayName: '[PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact'
-    inputs:
-      script: |
-        # NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic
-        echo "##[warning]NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic"
-        echo "##[debug]Output the values of variables as artifacts for debugging purposes"
-        echo "webSiteName: $(webSiteName) | groupId: $(groupId) | virtualAppName: $(virtualAppName)" > secret.txt
+  # - task: CmdLine@2
+  #   displayName: '[PRE BUILD DECORATOR] [DEBUG] output decorator params from Key Vault into an Artifact'
+  #   inputs:
+  #     script: |
+  #         # NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic
+  #         echo "##[warning]NOTE: This is for demonstration purposes only, to show how the secrets can be accessed within the decorator logic"
+  #         echo "##[debug]Output the values of variables as artifacts for debugging purposes"
+  #         echo "webSiteName: $(webSiteName) | groupId: $(groupId) | virtualAppName: $(virtualAppName)" > secret.txt
 
-  - task: CopyFiles@2
-    inputs:
-      Contents: secret.txt
-      targetFolder: '$(Build.ArtifactStagingDirectory)'
+  # - task: CopyFiles@2
+  #   inputs:
+  #     Contents: secret.txt
+  #     targetFolder: '$(Build.ArtifactStagingDirectory)'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'drop'
-      publishLocation: 'Container'
+  # - task: PublishBuildArtifacts@1
+  #   inputs:
+  #     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+  #     ArtifactName: 'drop'
+  #     publishLocation: 'Container'
 
   # ----------------------------------------------------------------------------------------------------------------------
   # SECRET BRUTE VALIDATION END
